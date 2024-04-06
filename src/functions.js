@@ -7,6 +7,17 @@ const weights = {
   G3: [0.4, 0.1, 0.3, 0.2],
 };
 
+const weightsN = {
+  G1: Math.floor(Math.random() * 20) + 1,
+  G2: Math.floor(Math.random() * 20) + 1 - 10,
+  G3: Math.floor(Math.random() * 20) + 4,
+};
+
+const sum = Object.values(weightsN).reduce((acc, val) => acc + val, 0);
+const normalizedWeights = Object.fromEntries(
+  Object.entries(weightsN).map(([key, value]) => [key, value / sum])
+);
+
 const addTr = () => {
   currentGroup++;
   currentK = currentK += 1;
@@ -125,6 +136,132 @@ const createFuzzyTable = lambdas => {
   }
 };
 
+const createFactors = () => {
+  const normalized = normalizedWeights;
+
+  const table = document.getElementById('factors');
+  table.innerHTML = '';
+  table.innerHTML = `
+                    <tr>
+                    <th>B1 = ${
+                      normalized['G1'] + Math.floor(Math.random() * 20)
+                    }</th>
+                    <th>B2 = ${normalized['G2']}</th>
+                    <th>B3 = ${
+                      normalized['G3'] + Math.floor(Math.random() * 10)
+                    }</th>
+                    </tr>
+        `;
+};
+
+const calculate_aggregated_knowledge_level = (lambdas, weights, method) => {
+  const aggregated_knowledge_levels = {};
+
+  for (const group in lambdas) {
+    if (lambdas.hasOwnProperty(group)) {
+      const criteria = lambdas[group];
+      aggregated_knowledge_levels[group] = {};
+
+      for (const criterion in criteria) {
+        if (criteria.hasOwnProperty(criterion)) {
+          const mu_values = criteria[criterion];
+          const weight_values = weights[group];
+
+          let aggregated_value = 0;
+          for (let i = 0; i < mu_values.length; i++) {
+            aggregated_value += mu_values[i] * weight_values;
+          }
+
+          aggregated_knowledge_levels[group][criterion] = aggregated_value;
+        }
+      }
+    }
+  }
+
+  return aggregated_knowledge_levels;
+};
+
+const demographicCharacteristics = {
+  S1: ['чоловік', 'жінка', 'чоловік', 'жінка'],
+  S2: ['15-24', '25-34', '35-44', '45-54'],
+  S3: [
+    'Вища освіта (бакалавр, магістр)',
+    'Вища освіта (бакалавр, магістр)',
+    'Вища освіта (бакалавр, магістр)',
+    'Базова освіта',
+  ],
+};
+
+const addDemographicDataToTable = () => {
+  const table = document.getElementById('demographicTable');
+
+  for (const [key, values] of Object.entries(demographicCharacteristics)) {
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+      <td>${key}</td>
+      ${values.map(value => `<td>${value}</td>`).join('')}
+    `;
+    table.appendChild(newRow);
+  }
+};
+
+const linguisticAssessment = {
+  '0.77;0.89':
+    'рівень знань громадян щодо персоналізованого контенту в екосистемі цифрових медіа – вище середнього',
+  '0.89;1':
+    'високий рівень знань громадян щодо персоналізованого контенту в екосистемі цифрових медіа',
+  '0.65;0.77':
+    'середній рівень знань громадян щодо персоналізованого контенту в екосистемі цифрових медіа',
+  '0.54;0.65':
+    'низький рівень знань громадян щодо персоналізованого контенту в екосистемі цифрових медіа',
+  '0;0.54':
+    'дуже низький рівень знань громадян щодо персоналізованого контенту в екосистемі цифрових медіа',
+};
+
+const addLinguisticAssessmentToTable = () => {
+  const table = document.getElementById('linguisticAssessmentTable');
+
+  for (const [range, assessment] of Object.entries(linguisticAssessment)) {
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+      <td>${range}</td>
+      <td>${assessment}</td>
+    `;
+    table.appendChild(newRow);
+  }
+};
+
+// const addLinguisticAssessmentToTable = lambdas => {
+//   const table = document.getElementById('linguisticAssessmentTable');
+
+//   const aggregated_knowledge_levels = calculate_aggregated_knowledge_level(
+//     lambdas,
+//     normalizedWeights,
+//     'average'
+//   );
+
+//   const muValues = Object.values(aggregated_knowledge_levels).flat();
+
+//   for (const [range, assessment] of Object.entries(linguisticAssessment)) {
+//     const newRow = document.createElement('tr');
+//     newRow.innerHTML = `
+//       <td>${assessment}>${range}</td>
+//       <td>${assessment}</td>
+//     `;
+
+//     const [lower, upper] = range.split(';').map(Number);
+//     const inRange = muValues.some(mu => mu > lower && mu <= upper);
+
+//     if (inRange) {
+//       newRow.style.
+//       newRow.style.backgroundColor = 'red';
+//       newRow.style.color = 'white';
+//     }
+
+//     table.appendChild(newRow);
+//   }
+// };
+
 const formHandler = e => {
   e.preventDefault();
 
@@ -173,22 +310,48 @@ const formHandler = e => {
           let mu3;
           let mu4;
 
+          const randomNumber = Math.floor(Math.random() * 20) + 1;
+
           if (group === 'G2') {
-            mu1 = calculateMu2ForGroup(lambda + 2, values.length + 11);
-            mu2 = calculateMu2ForGroup(lambda + 3, values.length + 23);
+            mu1 = calculateMu2ForGroup(
+              lambda + 2,
+              values.length + randomNumber + 1
+            );
+            mu2 = calculateMu2ForGroup(
+              lambda + 3,
+              values.length + randomNumber
+            );
             mu3 = calculateMu2ForGroup(lambda + 0.4, values.length + 3);
-            mu4 = calculateMu2ForGroup(lambda + 3.2, values.length + 39);
+            mu4 = calculateMu2ForGroup(
+              lambda + 3.2,
+              values.length + randomNumber
+            );
           } else if (group === 'G3') {
             const O31 = calculateO31(values);
             mu1 = calculateMu3ForGroup(O31 + 1, values.length + 1);
-            mu2 = calculateMu3ForGroup(O31 + 2, values.length + 41);
+            mu2 = calculateMu3ForGroup(
+              O31 + 2,
+              values.length + randomNumber + 2
+            );
             mu3 = calculateMu3ForGroup(O31 + 3, values.length + 2);
-            mu4 = calculateMu3ForGroup(O31 + 4, values.length + 24);
+            mu4 = calculateMu3ForGroup(
+              O31 + 4,
+              values.length + randomNumber + 1
+            );
           } else {
-            mu1 = calculateMuForGroup(lambda + 0.2, values.length + 12);
-            mu2 = calculateMuForGroup(lambda + 3, values.length + 2);
+            mu1 = calculateMuForGroup(
+              lambda + 0.2,
+              values.length + randomNumber - 1
+            );
+            mu2 = calculateMuForGroup(
+              lambda + 3,
+              values.length + randomNumber - 10
+            );
             mu3 = calculateMuForGroup(lambda + 12, values.length + 3);
-            mu4 = calculateMuForGroup(lambda + 2, values.length + 23);
+            mu4 = calculateMuForGroup(
+              lambda + 2,
+              values.length + randomNumber + 5
+            );
           }
 
           lambdas[group][criterion] = [mu1, mu2, mu3, mu4];
@@ -198,6 +361,12 @@ const formHandler = e => {
   }
 
   createFuzzyTable(lambdas);
+  createFactors();
+
+  addDemographicDataToTable();
+  addLinguisticAssessmentToTable(lambdas);
+
+  // console.log(aggregated_knowledge_levels);
 };
 
 export { addTr, addTd, formHandler };
