@@ -1,5 +1,5 @@
-let currentGroup = 0;
-let currentK = 0;
+let currentGroup = 3;
+let currentK = 26;
 
 const weights = {
   G1: [0.1, 0.2, 0.3, 0.4],
