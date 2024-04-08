@@ -8,9 +8,9 @@ const weights = {
 };
 
 const weightsN = {
-  G1: Math.floor(Math.random() * 20) + 1,
-  G2: Math.floor(Math.random() * 20) + 1 - 10,
-  G3: Math.floor(Math.random() * 20) + 4,
+  G1: Math.floor(Math.random() * 10) + 1,
+  G2: Math.floor(Math.random() * 10) + 1 - 10,
+  G3: Math.floor(Math.random() * 10) + 4,
 };
 
 const sum = Object.values(weightsN).reduce((acc, val) => acc + val, 0);
@@ -125,10 +125,10 @@ const createFuzzyTable = lambdas => {
       const newRow = document.createElement('tr');
       newRow.innerHTML = `
                               <td>${group}</td>
-                              <td>${mu[0]}</td>
-                              <td>${mu[1]}</td>
-                              <td>${mu[2]}</td>
-                              <td>${mu[3]}</td>
+                              <td>${mu[0].toFixed(3)}</td>
+                              <td>${mu[1].toFixed(3)}</td>
+                              <td>${mu[2].toFixed(3)}</td>
+                              <td>${mu[3].toFixed(3)}</td>
                             `;
       table.appendChild(newRow);
       u++;
@@ -143,13 +143,13 @@ const createFactors = () => {
   table.innerHTML = '';
   table.innerHTML = `
                     <tr>
-                    <th>B1 = ${
-                      normalized['G1'] + Math.floor(Math.random() * 20)
-                    }</th>
-                    <th>B2 = ${normalized['G2']}</th>
-                    <th>B3 = ${
-                      normalized['G3'] + Math.floor(Math.random() * 10)
-                    }</th>
+                    <th>B1 = ${(
+                      normalized['G1'] + Math.floor(Math.random() * 5)
+                    ).toFixed(3)}</th>
+                    <th>B2 = ${normalized['G2'].toFixed(3)}</th>
+                    <th>B3 = ${(
+                      normalized['G3'] + Math.floor(Math.random() * 5)
+                    ).toFixed(3)}</th>
                     </tr>
         `;
 };
